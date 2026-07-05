@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الإدارة — كلية تكنولوجيا العلوم الصحية التطبيقية</title>
+
+<!-- ========================================================
+     ⚙️ CONFIG - غيّر هذه القيم
+     ======================================================== -->
+<script>
+  const API_URL     = 'https://script.google.com/macros/s/AKfycbwpA7Qcp164WfsELfdii7tVb2xsXa24QXkL5fHnsL5Q3VcbgUgYmg9aw70cxxI4bzUg/exec';
+  const ADMIN_PASS  = 'admin2025';           // كلمة مرور الإدارة
+  const COLLEGE_NAME = 'كلية تكنولوجيا العلوم الصحية التطبيقية — جامعة بني سويف';
+  // رابط لوجو الكلية (يمكن تغييره)
+  const COLLEGE_LOGO = ''; // اترك فارغاً أو ضع URL صورة
+</script>
+
+<style>
+:root {
+  --primary:       #1a6e8e;
+  --primary-light: #2492b8;
+  --primary-xlt:   #e8f4f8;
+  --accent:        #0ea89e;
+  --accent-light:  #d4f0ee;
+  --gold:          #c8972b;
+  --gold-bg:       #fef8ec;
+  --surface:       #ffffff;
+  --surface-2:     #f5f8fa;
+  --surface-3:     #edf2f5;
+  --border:        #d4e3ea;
+  --text-1:        #1a2b35;
+  --text-2:        #4a6072;
+  --text-3:        #8aa5b5;
+  --danger:        #c0392b;
+  --danger-bg:     #fdf0ee;
+  --danger-border: rgba(192,57,43,.2);
+  --success:       #1a7a4e;
+  --success-bg:    #edf7f2;
+  --warning:       #b8720a;
+  --warning-bg:    #fef8ec;
+  --sidebar-w:     260px;
+  --header-h:      64px;
+  --radius-sm:     6px;
+  --radius:        12px;
+  --radius-lg:     18px;
+  --shadow-sm:     0 1px 4px rgba(26,110,142,.07);
+  --shadow:        0 4px 20px rgba(26,110,142,.10);
+  --shadow-lg:     0 12px 48px rgba(26,110,142,.14);
+  --font:          'Cairo', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap');
+
+body {
+  font-family: var(--font);
+  background: var(--surface-2);
+  color: var(--text-1);
+  min-height: 100vh;
+}
+
+/* ── Login ─────────────────────────────────────────────── */
+#login-screen {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(145deg, #e8f4f8 0%, #f0f8fc 50%, #dff0f5 100%);
+}
+
+.login-card {
+  background: var(--surface);
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+  padding: 48px 40px;
+  width: 100%; max-width: 420px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.login-logo {
+  width: 72px; height: 72px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin: 0 auto 20px;
+  box-shadow: 0 8px 24px rgba(26,110,142,.25);
+}
+
+.login-card h2 {
+  font-size: 20px; font-weight: 800; color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.login-card p { font-size: 13px; color: var(--text-3); margin-bottom: 32px; }
+
+.login-field {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 16px; text-align: right;
+}
+
+.login-field label {
+  font-size: 13px; font-weight: 700; color: var(--text-2);
+}
+
+.login-field input {
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font); font-size: 15px; font-weight: 600;
+  color: var(--text-1);
+  background: var(--surface-2);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  width: 100%;
+}
+
+.login-field input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26,110,142,.1);
+  background: var(--surface);
+}
+
+.login-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: #fff; border: none; border-radius: 8px;
+  font-family: var(--font); font-size: 15px; font-weight: 800;
+  cursor: pointer; margin-top: 8px;
+  box-shadow: 0 4px 14px rgba(26,110,142,.3);
+  transition: transform .2s, box-shadow .2s;
+}
+
+.login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,110,142,.4); }
+.login-err { color: var(--danger); font-size: 13px; margin-top: 10px; font-weight: 700; display:none; }
+
+/* ── App shell ─────────────────────────────────────────── */
+#app { display: none; }
+
+/* ── Sidebar ────────────────────────────────────────────── */
+.sidebar {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column;
+  z-index: 200;
+  transition: transform .3s;
+}
+
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+
+.sidebar-logo-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+
+.sidebar-logo-text { font-size: 12px; font-weight: 800; color: var(--primary); line-height: 1.4; }
+
+.sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+
+.nav-section-label {
+  font-size: 10px; font-weight: 800; color: var(--text-3);
+  letter-spacing: .8px; text-transform: uppercase;
+  padding: 14px 10px 6px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px; font-weight: 700; color: var(--text-2);
+  transition: all .2s;
+  margin-bottom: 2px;
+  position: relative;
+}
+
+.nav-item:hover { background: var(--surface-2); color: var(--primary); }
+.nav-item.active {
+  background: var(--primary-xlt); color: var(--primary);
+}
+.nav-item.active::before {
+  content: ''; position: absolute; right: 0; top: 20%; bottom: 20%;
+  width: 3px; background: var(--primary); border-radius: 2px 0 0 2px;
+}
+
+.nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.nav-badge {
+  margin-right: auto;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 11px; font-weight: 800;
+  min-width: 20px; text-align: center;
+}
+
+.nav-badge.danger { background: var(--danger); }
+.nav-badge.success { background: var(--success); }
+
+.sidebar-footer {
+  padding: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 13px; font-weight: 700;
+  color: var(--text-2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all .2s;
+}
+
+.logout-btn:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-bg); }
+
+/* ── Main area ──────────────────────────────────────────── */
+.main-content {
+  margin-right: var(--sidebar-w);
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ── Top bar ────────────────────────────────────────────── */
+.topbar {
+  height: var(--header-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 28px; gap: 16px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.topbar-title { font-size: 17px; font-weight: 800; color: var(--text-1); }
+.topbar-subtitle { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+.topbar-spacer { flex: 1; }
+
+.topbar-time {
+  font-size: 13px; color: var(--text-3); font-weight: 600;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 14px;
+}
+
+/* ── Page ───────────────────────────────────────────────── */
+.page { padding: 28px; display: none; }
+.page.active { display: block; }
+
+/* ── Stats cards ────────────────────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex; align-items: center; gap: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s;
+}
+
+.stat-card:hover { box-shadow: var(--shadow); }
+
+.stat-icon {
+  width: 50px; height: 50px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+
+.stat-icon.blue   { background: var(--primary-xlt); }
+.stat-icon.green  { background: var(--success-bg); }
+.stat-icon.red    { background: var(--danger-bg); }
+.stat-icon.gold   { background: var(--gold-bg); }
+
+.stat-value { font-size: 28px; font-weight: 800; color: var(--text-1); line-height: 1; }
+.stat-label { font-size: 12px; color: var(--text-3); font-weight: 600; margin-top: 3px; }
+
+/* ── Card ───────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.card-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+
+.card-head h3 { font-size: 15px; font-weight: 800; color: var(--text-1); }
+.card-head-actions { margin-right: auto; display: flex; gap: 8px; }
+
+/* ── Toolbar ────────────────────────────────────────────── */
+.toolbar {
+  padding: 14px 20px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+}
+
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 8px 14px;
+  flex: 1; min-width: 200px;
+}
+
+.search-box input {
+  border: none; background: transparent;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  color: var(--text-1); outline: none; width: 100%;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  color: var(--text-2); background: var(--surface);
+  cursor: pointer; outline: none;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px;
+  font-family: var(--font); font-size: 13px; font-weight: 700;
+  cursor: pointer; border: none; transition: all .2s; white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: #fff; box-shadow: 0 3px 10px rgba(26,110,142,.25);
+}
+
+.btn-primary:hover { box-shadow: 0 5px 16px rgba(26,110,142,.35); transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent; border: 1.5px solid var(--border);
+  color: var(--text-2);
+}
+
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+
+.btn-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger); }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+
+.btn-success { background: var(--success-bg); border: 1px solid rgba(26,122,78,.2); color: var(--success); }
+.btn-success:hover { background: var(--success); color: #fff; }
+
+.btn-gold { background: var(--gold-bg); border: 1px solid rgba(200,151,43,.3); color: var(--gold); }
+.btn-gold:hover { background: var(--gold); color: #fff; }
+
+/* ── Table ──────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  padding: 12px 14px; text-align: right;
+  font-size: 11px; font-weight: 800; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .3px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--surface-3);
+  color: var(--text-1);
+  font-weight: 500;
+}
+
+tr:hover td { background: var(--primary-xlt); }
+tr:last-child td { border-bottom: none; }
+
+/* ── Status badge ───────────────────────────────────────── */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 800; white-space: nowrap;
+}
+
+.status-pending  { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(184,114,10,.25); }
+.status-accepted { background: var(--success-bg); color: var(--success); border: 1px solid rgba(26,122,78,.25); }
+.status-rejected { background: var(--danger-bg);  color: var(--danger);  border: 1px solid var(--danger-border); }
+.status-waiting  { background: var(--primary-xlt); color: var(--primary); border: 1px solid rgba(26,110,142,.2); }
+
+/* ── Pagination ─────────────────────────────────────────── */
+.pagination {
+  display: flex; align-items: center; gap: 6px;
+  padding: 14px 20px; justify-content: center;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; border: 1.5px solid var(--border);
+  background: var(--surface); color: var(--text-2);
+  transition: all .2s;
+}
+
+.page-btn:hover, .page-btn.active {
+  border-color: var(--primary); background: var(--primary-xlt); color: var(--primary);
+}
+
+/* ── Modal ──────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: flex-start; justify-content: center;
+  z-index: 1000; padding: 30px 16px;
+  overflow-y: auto;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s;
+}
+
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 100%; max-width: 820px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  transform: translateY(20px);
+  transition: transform .25s;
+}
+
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  padding: 20px 24px;
+  display: flex; align-items: center; gap: 14px;
+}
+
+.modal-header h3 { font-size: 18px; font-weight: 800; color: #fff; flex: 1; }
+
+.modal-close {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  border: none; cursor: pointer; color: #fff; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+
+.modal-close:hover { background: rgba(255,255,255,.3); }
+
+.modal-body { padding: 24px; max-height: 80vh; overflow-y: auto; }
+
+/* ── Detail sections ────────────────────────────────────── */
+.detail-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px;
+}
+
+.detail-label { font-size: 11px; font-weight: 700; color: var(--text-3); margin-bottom: 3px; }
+.detail-value { font-size: 14px; font-weight: 700; color: var(--text-1); }
+
+.section-divider {
+  font-size: 13px; font-weight: 800; color: var(--primary);
+  padding: 10px 14px;
+  background: var(--primary-xlt);
+  border-radius: 8px;
+  border-right: 4px solid var(--primary);
+  margin: 16px 0 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── Docs grid ──────────────────────────────────────────── */
+.docs-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;
+  margin-bottom: 20px;
+}
+
+.doc-card {
+  border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; cursor: pointer; transition: all .2s;
+  background: var(--surface);
+}
+
+.doc-card:hover { box-shadow: var(--shadow); border-color: var(--primary); transform: translateY(-2px); }
+
+.doc-card img {
+  width: 100%; height: 90px; object-fit: cover;
+  display: block;
+}
+
+.doc-card-label {
+  padding: 7px 10px;
+  font-size: 11px; font-weight: 700; color: var(--text-2);
+  text-align: center;
+  background: var(--surface-2);
+}
+
+/* ── Status update panel ────────────────────────────────── */
+.status-panel {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.status-panel h4 { font-size: 14px; font-weight: 800; color: var(--text-1); margin-bottom: 14px; }
+
+.status-options { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+
+.status-opt {
+  padding: 8px 16px; border-radius: 8px;
+  font-family: var(--font); font-size: 13px; font-weight: 700;
+  cursor: pointer; border: 1.5px solid transparent;
+  transition: all .2s;
+}
+
+.status-opt[data-s="مقبول"]             { background: var(--success-bg); color: var(--success); border-color: rgba(26,122,78,.25); }
+.status-opt[data-s="مرفوض"]             { background: var(--danger-bg);  color: var(--danger);  border-color: var(--danger-border); }
+.status-opt[data-s="قيد المراجعة"]      { background: var(--warning-bg); color: var(--warning); border-color: rgba(184,114,10,.25); }
+.status-opt[data-s="بانتظار المستندات"] { background: var(--primary-xlt); color: var(--primary); border-color: rgba(26,110,142,.2); }
+
+.status-opt.selected { box-shadow: 0 0 0 3px currentColor; }
+
+textarea.notes-box {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  color: var(--text-1); background: var(--surface);
+  resize: vertical; min-height: 80px; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  margin-bottom: 10px;
+}
+
+textarea.notes-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,110,142,.1); }
+
+/* ── WhatsApp panel ─────────────────────────────────────── */
+.wa-panel {
+  background: #f0faf6;
+  border: 1px solid rgba(37,211,102,.3);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-top: 16px;
+}
+
+.wa-panel h4 {
+  font-size: 14px; font-weight: 800; color: #1a7a4e;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.wa-preview {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(37,211,102,.25);
+  font-size: 13px; line-height: 1.9;
+  color: var(--text-1); font-weight: 500;
+  margin-bottom: 12px;
+  white-space: pre-line;
+  max-height: 200px; overflow-y: auto;
+}
+
+/* ── Image lightbox ─────────────────────────────────────── */
+.lightbox {
+  position: fixed; inset: 0; background: rgba(0,0,0,.92);
+  z-index: 2000; display: none; align-items: center; justify-content: center;
+  flex-direction: column; gap: 14px; overflow: hidden;
+}
+
+.lightbox.open { display: flex; }
+
+.lightbox-img-wrap {
+  max-width: 90vw; max-height: 80vh; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: none;
+}
+
+.lightbox img {
+  max-width: 90vw; max-height: 80vh;
+  border-radius: 8px; object-fit: contain;
+  transform-origin: center center;
+  transition: transform .15s ease-out;
+  user-select: none; -webkit-user-drag: none;
+  cursor: zoom-in;
+}
+
+.lightbox img.zoomed { cursor: grab; transition: none; }
+.lightbox img.dragging { cursor: grabbing; transition: none; }
+
+.lightbox-close {
+  position: fixed; top: 16px; left: 16px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255,255,255,.15); border: none;
+  color: #fff; font-size: 22px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+
+.lightbox-close:hover { background: rgba(255,255,255,.3); }
+.lightbox-label { color: rgba(255,255,255,.7); font-size: 13px; font-weight: 600; }
+
+.lightbox-zoom-controls {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,.12); border-radius: 30px; padding: 6px;
+  backdrop-filter: blur(6px);
+}
+
+.lightbox-zoom-controls button {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,.12); border: none;
+  color: #fff; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+
+.lightbox-zoom-controls button:hover { background: rgba(255,255,255,.3); }
+.lightbox-zoom-level {
+  color: #fff; font-size: 12px; font-weight: 700;
+  min-width: 44px; text-align: center; user-select: none;
+}
+
+/* ── Empty state ────────────────────────────────────────── */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-3);
+}
+
+.empty-state-icon { font-size: 48px; margin-bottom: 14px; }
+.empty-state h3 { font-size: 18px; font-weight: 800; color: var(--text-2); }
+.empty-state p { font-size: 13px; margin-top: 6px; }
+
+/* ── Loading overlay ────────────────────────────────────── */
+.loading-overlay {
+  position: fixed; inset: 0; background: rgba(255,255,255,.85);
+  z-index: 500; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+
+.spinner-large {
+  width: 48px; height: 48px;
+  border: 4px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-overlay p { font-size: 14px; font-weight: 700; color: var(--text-2); }
+
+/* ── Toast ──────────────────────────────────────────────── */
+.toast-container {
+  position: fixed; bottom: 24px; left: 24px; z-index: 3000;
+  display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--text-1); color: #fff;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 700;
+  box-shadow: var(--shadow-lg);
+  animation: slideIn .3s ease, fadeOut .3s ease 2.7s forwards;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.toast.success { background: var(--success); }
+.toast.error   { background: var(--danger); }
+
+@keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-right: 0; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   ██  ADVANCED FILTER SYSTEM
+   ══════════════════════════════════════════════════════════ */
+
+.filter-bar {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+/* ── Main search row ── */
+.filter-row-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface-2); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 9px 14px;
+  flex: 1; min-width: 220px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.search-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26,110,142,.1);
+  background: var(--surface);
+}
+.search-icon { font-size: 15px; color: var(--text-3); flex-shrink: 0; }
+.search-box input {
+  border: none; background: transparent;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  color: var(--text-1); outline: none; width: 100%;
+}
+.search-clear {
+  display: none; border: none; background: none;
+  color: var(--text-3); cursor: pointer; font-size: 13px; padding: 0 2px;
+  line-height: 1; border-radius: 4px;
+}
+.search-clear:hover { color: var(--danger); }
+.search-box.has-value .search-clear { display: block; }
+
+/* ── Quick status filter pills ── */
+.quick-filters {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+
+.qf-btn {
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-family: var(--font); font-size: 12px; font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  transition: all .18s;
+  white-space: nowrap;
+}
+
+.qf-btn:hover {
+  border-color: var(--primary-light);
+  color: var(--primary);
+  background: var(--primary-xlt);
+}
+
+.qf-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 3px 10px rgba(26,110,142,.25);
+}
+
+/* ── Advanced toggle button ── */
+.adv-toggle-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 10px;
+  font-family: var(--font); font-size: 13px; font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2); color: var(--text-2);
+  transition: all .2s; white-space: nowrap; flex-shrink: 0;
+}
+.adv-toggle-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-xlt); }
+.adv-toggle-btn.open  { border-color: var(--primary); color: var(--primary); background: var(--primary-xlt); }
+
+.adv-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--primary); color: #fff;
+  border-radius: 10px; padding: 1px 7px;
+  font-size: 11px; font-weight: 800; min-width: 18px;
+}
+
+/* ── Advanced panel ── */
+.adv-panel {
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s;
+  opacity: 0;
+  border-top: 0px solid var(--border);
+}
+
+.adv-panel.open {
+  max-height: 400px;
+  opacity: 1;
+  border-top: 1px solid var(--border);
+}
+
+.adv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+  padding: 16px 18px 10px;
+}
+
+.adv-field {
+  display: flex; flex-direction: column; gap: 5px;
+}
+
+.adv-field label {
+  font-size: 11px; font-weight: 800; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .4px;
+}
+
+.adv-field select,
+.adv-field input[type="date"] {
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  color: var(--text-2); background: var(--surface);
+  cursor: pointer; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.adv-field select:focus,
+.adv-field input[type="date"]:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26,110,142,.1);
+}
+
+.adv-field select.active-filter,
+.adv-field input[type="date"].active-filter {
+  border-color: var(--primary);
+  background: var(--primary-xlt);
+  color: var(--primary);
+}
+
+.sort-row { display: flex; gap: 6px; }
+.sort-row select { flex: 1; }
+
+.sort-dir-btn {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface); color: var(--text-2);
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s; font-weight: 800;
+}
+.sort-dir-btn:hover { border-color: var(--primary); color: var(--primary); }
+.sort-dir-btn.desc { background: var(--primary-xlt); border-color: var(--primary); color: var(--primary); }
+
+.adv-actions {
+  padding: 0 18px 14px;
+  display: flex; justify-content: flex-end;
+}
+
+/* ── Active filter chips ── */
+.chips-row {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 8px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  background: var(--primary-xlt); color: var(--primary);
+  border: 1px solid rgba(26,110,142,.25);
+  font-size: 12px; font-weight: 700;
+  animation: chipIn .18s ease;
+}
+
+@keyframes chipIn { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.chip-label { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-close {
+  border: none; background: none;
+  color: var(--primary); cursor: pointer; font-size: 12px; padding: 0;
+  line-height: 1; opacity: .7;
+  transition: opacity .15s;
+}
+.chip-close:hover { opacity: 1; }
+
+.chip-clear-all {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 20px;
+  background: var(--danger-bg); color: var(--danger);
+  border: 1px solid var(--danger-border);
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: background .15s;
+}
+.chip-clear-all:hover { background: var(--danger); color: #fff; }
+
+/* ── Results bar ── */
+.results-bar {
+  padding: 6px 18px 8px;
+  font-size: 12px; color: var(--text-3); font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+  border-top: 1px solid var(--surface-3);
+}
+
+.results-sep { color: var(--border); }
+
+#results-count { font-weight: 800; color: var(--text-2); }
+
+.results-pct-bar {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+.pct-pill {
+  display: inline-block;
+  padding: 1px 8px; border-radius: 10px;
+  font-size: 11px; font-weight: 800;
+  background: var(--accent-light); color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .quick-filters { display: none; }
+  .adv-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .adv-grid { grid-template-columns: 1fr; }
+  .filter-row-main { padding: 10px 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Login Screen ──────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🏥</div>
+    <h2>كلية تكنولوجيا العلوم الصحية التطبيقية</h2>
+    <p>لوحة إدارة الطلبات — تسجيل دخول</p>
+    <div class="login-field">
+      <label>كلمة المرور</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">دخول إلى لوحة الإدارة</button>
+    <div class="login-err" id="login-err">❌ كلمة المرور غير صحيحة</div>
+  </div>
+</div>
+
+<!-- ── App ───────────────────────────────────────────────── -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">🏥</div>
+      <div class="sidebar-logo-text">كلية تكنولوجيا<br>العلوم الصحية التطبيقية</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">الرئيسية</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <span class="nav-icon">📊</span> لوحة التحكم
+      </div>
+      <div class="nav-section-label">إدارة الطلبات</div>
+      <div class="nav-item" onclick="showPage('applications')">
+        <span class="nav-icon">📋</span> جميع الطلبات
+        <span class="nav-badge" id="badge-all">—</span>
+      </div>
+      <div class="nav-item" onclick="showPage('applications','قيد المراجعة')">
+        <span class="nav-icon">⏳</span> قيد المراجعة
+        <span class="nav-badge" id="badge-pending">—</span>
+      </div>
+      <div class="nav-item" onclick="showPage('applications','مقبول')">
+        <span class="nav-icon">✅</span> المقبولون
+        <span class="nav-badge success" id="badge-accepted">—</span>
+      </div>
+      <div class="nav-item" onclick="showPage('applications','مرفوض')">
+        <span class="nav-icon">❌</span> المرفوضون
+        <span class="nav-badge danger" id="badge-rejected">—</span>
+      </div>
+      <div class="nav-item" onclick="showPage('applications','بانتظار المستندات')">
+        <span class="nav-icon">📎</span> بانتظار المستندات
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="logout()">🚪 تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">لوحة التحكم</div>
+        <div class="topbar-subtitle">كلية تكنولوجيا العلوم الصحية التطبيقية</div>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-time" id="topbar-time"></div>
+      <button class="btn btn-outline" onclick="loadData()" style="font-size:13px;">
+        🔄 تحديث
+      </button>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-row" id="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon blue">📥</div>
+          <div><div class="stat-value" id="stat-total">—</div><div class="stat-label">إجمالي المتقدمين</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon gold">⏳</div>
+          <div><div class="stat-value" id="stat-pending">—</div><div class="stat-label">قيد المراجعة</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div><div class="stat-value" id="stat-accepted">—</div><div class="stat-label">مقبول</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">❌</div>
+          <div><div class="stat-value" id="stat-rejected">—</div><div class="stat-label">مرفوض</div></div>
+        </div>
+      </div>
+
+      <!-- By Dept chart simplified -->
+      <div class="card">
+        <div class="card-head">
+          <span>🏥</span>
+          <h3>الطلبات حسب القسم</h3>
+          <div class="card-head-actions">
+            <button class="btn btn-outline btn-sm" onclick="loadData()">تحديث</button>
+          </div>
+        </div>
+        <div style="padding:20px;" id="dept-chart">
+          <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <h3>جاري تحميل البيانات...</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- By Grade chart -->
+      <div class="card">
+        <div class="card-head">
+          <span>🎓</span>
+          <h3>المتقدمون حسب التقدير</h3>
+        </div>
+        <div style="padding:20px;" id="grade-chart">
+          <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <h3>جاري تحميل البيانات...</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Applications Page -->
+    <div class="page" id="page-applications">
+      <div class="card">
+        <div class="card-head">
+          <span>📋</span>
+          <h3 id="apps-page-title">جميع الطلبات</h3>
+          <div class="card-head-actions">
+            <button class="btn btn-primary btn-sm" onclick="exportData()">📤 تصدير Excel</button>
+          </div>
+        </div>
+
+        <!-- ── Filter Bar ── -->
+        <div class="filter-bar">
+          <!-- Row 1: search + quick filters + toggle -->
+          <div class="filter-row-main">
+            <div class="search-box" id="search-box-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="search-input" placeholder="بحث بالاسم أو الرقم القومي أو رقم الطلب..."
+                oninput="filterApplications()" autocomplete="off">
+              <button class="search-clear" id="search-clear-btn" onclick="clearSearch()" title="مسح البحث">✕</button>
+            </div>
+            <div class="quick-filters">
+              <button class="qf-btn active" data-status="" onclick="setQuickStatus(this, '')">الكل</button>
+              <button class="qf-btn" data-status="قيد المراجعة" onclick="setQuickStatus(this, 'قيد المراجعة')">⏳ مراجعة</button>
+              <button class="qf-btn" data-status="مقبول" onclick="setQuickStatus(this, 'مقبول')">✅ مقبول</button>
+              <button class="qf-btn" data-status="مرفوض" onclick="setQuickStatus(this, 'مرفوض')">❌ مرفوض</button>
+              <button class="qf-btn" data-status="بانتظار المستندات" onclick="setQuickStatus(this, 'بانتظار المستندات')">📎 مستندات</button>
+            </div>
+            <button class="adv-toggle-btn" id="adv-toggle" onclick="toggleAdvanced()">
+              <span id="adv-toggle-icon">⚙️</span> فلتر متقدم
+              <span class="adv-count" id="adv-count" style="display:none">0</span>
+            </button>
+            <button class="adv-toggle-btn" id="quick-date-sort-btn" onclick="toggleDateSort()" title="تغيير ترتيب التاريخ" style="min-width:120px;">
+              📅 <span id="quick-sort-label">الأحدث أولاً</span>
+            </button>
+          </div>
+
+          <!-- Row 2: Advanced filters (collapsible) -->
+          <div class="adv-panel" id="adv-panel">
+            <div class="adv-grid">
+              <div class="adv-field">
+                <label>القسم</label>
+                <select id="filter-dept" onchange="filterApplications()">
+                  <option value="">— كل الأقسام —</option>
+                  <option>قسم الأشعة</option>
+                  <option>قسم المختبرات</option>
+                  <option>قسم صحة المجتمع</option>
+                  <option>قسم الإدارة</option>
+                  <option>قسم التنفس الصناعي</option>
+                  <option>قسم البصريات</option>
+                  <option>قسم الأجهزة الطبية</option>
+                  <option>قسم تركيبات الأسنان</option>
+                  <option>أقسام أخرى</option>
+                </select>
+              </div>
+              <div class="adv-field">
+                <label>النوع</label>
+                <select id="filter-gender" onchange="filterApplications()">
+                  <option value="">— الكل —</option>
+                  <option>ذكر</option>
+                  <option>أنثى</option>
+                </select>
+              </div>
+              <div class="adv-field">
+                <label>التقدير</label>
+                <select id="filter-grade" onchange="filterApplications()">
+                  <option value="">— الكل —</option>
+                  <option>امتياز</option>
+                  <option>مشرف</option>
+                  <option>جيد جداً</option>
+                  <option>جيد</option>
+                  <option>مقبول</option>
+                </select>
+              </div>
+              <div class="adv-field">
+                <label>المحافظة</label>
+                <select id="filter-gov" onchange="filterApplications()">
+                  <option value="">— الكل —</option>
+                </select>
+              </div>
+              <div class="adv-field">
+                <label>سنة التخرج</label>
+                <select id="filter-year" onchange="filterApplications()">
+                  <option value="">— الكل —</option>
+                </select>
+              </div>
+              <div class="adv-field adv-field-date">
+                <label>تاريخ التقديم من</label>
+                <input type="date" id="filter-date-from" onchange="filterApplications()">
+              </div>
+              <div class="adv-field adv-field-date">
+                <label>إلى</label>
+                <input type="date" id="filter-date-to" onchange="filterApplications()">
+              </div>
+              <div class="adv-field adv-field-sort">
+                <label>ترتيب حسب</label>
+                <div class="sort-row">
+                  <select id="sort-field" onchange="filterApplications()">
+                    <option value="">الافتراضي</option>
+                    <option value="تاريخ التقديم">تاريخ التقديم</option>
+                    <option value="الاسم الرباعي">الاسم</option>
+                    <option value="القسم">القسم</option>
+                    <option value="التقدير">التقدير</option>
+                    <option value="سنة التخرج">سنة التخرج</option>
+                  </select>
+                  <button class="sort-dir-btn" id="sort-dir-btn" onclick="toggleSortDir()" title="تغيير الاتجاه">↓</button>
+                </div>
+              </div>
+            </div>
+            <div class="adv-actions">
+              <button class="btn btn-outline btn-sm" onclick="resetAllFilters()">🗑 إعادة تعيين الكل</button>
+            </div>
+          </div>
+
+          <!-- Row 3: Active filter chips -->
+          <div class="chips-row" id="chips-row" style="display:none"></div>
+
+          <!-- Row 4: Results summary -->
+          <div class="results-bar" id="results-bar">
+            <span id="results-count">0 طلب</span>
+            <span class="results-sep">·</span>
+            <span id="results-pct"></span>
+          </div>
+        </div>
+
+        <!-- hidden select kept for compatibility with showPage() -->
+        <select id="filter-status" style="display:none" onchange="filterApplications()">
+          <option value="">— كل الحالات —</option>
+          <option>قيد المراجعة</option>
+          <option>مقبول</option>
+          <option>مرفوض</option>
+          <option>بانتظار المستندات</option>
+        </select>
+
+        <div class="table-wrap">
+          <table id="apps-table">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>الاسم</th>
+                <th>القسم</th>
+                <th>الرقم القومي</th>
+                <th>الهاتف</th>
+                <th>التقدير</th>
+                <th>الحالة</th>
+                <th id="th-date" onclick="toggleDateSort()" style="cursor:pointer; user-select:none;" title="ترتيب حسب التاريخ">تاريخ التقديم ↓</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="apps-tbody"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+
+  </div><!-- /.main-content -->
+</div><!-- /#app -->
+
+<!-- ── Application Detail Modal ─────────────────────────── -->
+<div class="modal-overlay" id="detail-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span style="font-size:22px;">📋</span>
+      <h3 id="modal-app-id">تفاصيل الطلب</h3>
+      <button class="modal-close" onclick="closeModalNow()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ── Image Lightbox ─────────────────────────────────────── -->
+<div class="lightbox" id="lightbox" onclick="handleLightboxBgClick(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <div class="lightbox-img-wrap" id="lightbox-img-wrap">
+    <img id="lightbox-img" src="" alt="">
+  </div>
+  <div class="lightbox-label" id="lightbox-label"></div>
+  <a id="lightbox-original" href="" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:#fff;text-decoration:underline;font-size:13px;margin-top:8px;">فتح الصورة بالحجم الأصلي في Drive ↗</a>
+  <div class="lightbox-zoom-controls" onclick="event.stopPropagation()">
+    <button onclick="zoomOut()" title="تصغير">−</button>
+    <span class="lightbox-zoom-level" id="zoom-level">100%</span>
+    <button onclick="zoomIn()" title="تكبير">+</button>
+    <button onclick="zoomReset()" title="إعادة الضبط" style="font-size:14px;">⟲</button>
+  </div>
+</div>
+
+<!-- ── Loading ───────────────────────────────────────────── -->
+<div class="loading-overlay" id="loading" style="display:none;">
+  <div class="spinner-large"></div>
+  <p id="loading-text">جاري التحميل...</p>
+</div>
+
+<!-- ── Toast Container ───────────────────────────────────── -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ============================================================
+// State
+// ============================================================
+let allApps = [];
+let filteredApps = [];
+let currentPage = 1;
+const pageSize = 15;
+let currentFilter = '';
+let selectedStatus = '';
+let currentApp = null;
+let sortDir = 'desc'; // 'asc' | 'desc'
+
+// ============================================================
+// Login
+// ============================================================
+function doLogin() {
+  const pass = document.getElementById('login-pass').value;
+  if (pass === ADMIN_PASS) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    startClock();
+    loadData();
+  } else {
+    document.getElementById('login-err').style.display = '';
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-pass').focus();
+  }
+}
+
+function logout() {
+  if (confirm('هل تريد تسجيل الخروج؟')) {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-pass').value = '';
+  }
+}
+
+// ============================================================
+// Clock
+// ============================================================
+function startClock() {
+  const el = document.getElementById('topbar-time');
+  const update = () => {
+    const now = new Date();
+    el.textContent = now.toLocaleString('ar-EG', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  };
+  update(); setInterval(update, 10000);
+}
+
+// ============================================================
+// Load Data
+// ============================================================
+async function loadData() {
+  showLoading('جاري تحميل الطلبات...');
+  try {
+    const [appsRes, statsRes] = await Promise.all([
+      fetch(`${API_URL}?action=getApplications`),
+      fetch(`${API_URL}?action=getStats`)
+    ]);
+    const appsJson  = await appsRes.json();
+    const statsJson = await statsRes.json();
+
+    if (appsJson.success) {
+      allApps = appsJson.data || [];
+      filteredApps = [...allApps];
+      populateDynamicFilters();
+      filterApplications();
+      updateResultsBar(allApps.length, allApps.length);
+      renderGradeChart(computeByGrade(allApps));
+    }
+
+    if (statsJson.success) {
+      const s = statsJson.stats;
+      document.getElementById('stat-total').textContent    = s.total || 0;
+      document.getElementById('stat-pending').textContent  = s.pending || 0;
+      document.getElementById('stat-accepted').textContent = s.accepted || 0;
+      document.getElementById('stat-rejected').textContent = s.rejected || 0;
+      document.getElementById('badge-all').textContent     = s.total || 0;
+      document.getElementById('badge-pending').textContent  = s.pending || 0;
+      document.getElementById('badge-accepted').textContent = s.accepted || 0;
+      document.getElementById('badge-rejected').textContent = s.rejected || 0;
+      renderDeptChart(s.byDepartment || {});
+    }
+  } catch (err) {
+    toast('تعذر الاتصال بالخادم', 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+// ============================================================
+// Dept Chart
+// ============================================================
+function renderDeptChart(byDept) {
+  const entries = Object.entries(byDept).sort((a, b) => b[1] - a[1]);
+  const max = entries[0]?.[1] || 1;
+  const colors = ['#1a6e8e','#0ea89e','#c8972b','#2492b8','#1a7a4e','#7b4fa5','#c0392b','#e67e22','#27ae60'];
+
+  if (!entries.length) {
+    document.getElementById('dept-chart').innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><h3>لا توجد بيانات بعد</h3></div>';
+    return;
+  }
+
+  document.getElementById('dept-chart').innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      ${entries.map(([dept, count], i) => `
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:160px; font-size:13px; font-weight:700; color:var(--text-2); text-align:right; flex-shrink:0;">${dept}</div>
+          <div style="flex:1; height:32px; background:var(--surface-3); border-radius:6px; overflow:hidden;">
+            <div style="height:100%; width:${(count/max*100).toFixed(1)}%; background:${colors[i%colors.length]}; border-radius:6px; display:flex; align-items:center; padding:0 10px; transition:width .8s ease;">
+              <span style="color:#fff; font-size:13px; font-weight:800;">${count}</span>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ============================================================
+// Grade Chart
+// ============================================================
+function computeByGrade(apps) {
+  const byGrade = {};
+  apps.forEach(a => {
+    const g = a['التقدير'] || 'غير محدد';
+    byGrade[g] = (byGrade[g] || 0) + 1;
+  });
+  return byGrade;
+}
+
+function renderGradeChart(byGrade) {
+  const gradeOrder = ['امتياز', 'مشرف', 'جيد جداً', 'جيد', 'مقبول'];
+  const entries = Object.entries(byGrade).sort((a, b) => {
+    const ai = gradeOrder.indexOf(a[0]);
+    const bi = gradeOrder.indexOf(b[0]);
+    if (ai === -1 && bi === -1) return b[1] - a[1];
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+  const max = entries.reduce((m, [, c]) => Math.max(m, c), 1);
+  const colors = ['#1a7a4e','#1a6e8e','#0ea89e','#c8972b','#c0392b','#7b4fa5'];
+
+  if (!entries.length) {
+    document.getElementById('grade-chart').innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><h3>لا توجد بيانات بعد</h3></div>';
+    return;
+  }
+
+  document.getElementById('grade-chart').innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      ${entries.map(([grade, count], i) => `
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:160px; font-size:13px; font-weight:700; color:var(--text-2); text-align:right; flex-shrink:0;">${grade}</div>
+          <div style="flex:1; height:32px; background:var(--surface-3); border-radius:6px; overflow:hidden;">
+            <div style="height:100%; width:${(count/max*100).toFixed(1)}%; background:${colors[i%colors.length]}; border-radius:6px; display:flex; align-items:center; padding:0 10px; transition:width .8s ease;">
+              <span style="color:#fff; font-size:13px; font-weight:800;">${count}</span>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ============================================================
+// Advanced Filter System
+// ============================================================
+
+/* ── Quick status pill ── */
+function setQuickStatus(btn, status) {
+  document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('filter-status').value = status;
+  filterApplications();
+}
+
+/* ── Toggle advanced panel ── */
+function toggleAdvanced() {
+  const panel = document.getElementById('adv-panel');
+  const btn   = document.getElementById('adv-toggle');
+  const isOpen = panel.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  document.getElementById('adv-toggle-icon').textContent = isOpen ? '⚙️' : '⚙️';
+}
+
+function updateDateSortHeader() {
+  const th = document.getElementById('th-date');
+  if (!th) return;
+  const sortFld = document.getElementById('sort-field')?.value || '';
+  const isDateSort = !sortFld || sortFld === 'تاريخ التقديم';
+  th.innerHTML = isDateSort
+    ? `تاريخ التقديم <span style="color:var(--primary)">${sortDir === 'asc' ? '↑' : '↓'}</span>`
+    : 'تاريخ التقديم';
+}
+
+/* ── Toggle sort by clicking date header or quick button ── */
+function toggleDateSort() {
+  const sortFieldEl = document.getElementById('sort-field');
+  if (sortFieldEl) sortFieldEl.value = 'تاريخ التقديم';
+  sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  const btn = document.getElementById('sort-dir-btn');
+  if (btn) { btn.textContent = sortDir === 'asc' ? '↑' : '↓'; btn.classList.toggle('desc', sortDir === 'desc'); }
+  // Update quick button label
+  const lbl = document.getElementById('quick-sort-label');
+  if (lbl) lbl.textContent = sortDir === 'asc' ? 'الأقدم أولاً' : 'الأحدث أولاً';
+  filterApplications();
+}
+
+/* ── Sort direction ── */
+function toggleSortDir() {
+  sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  const btn = document.getElementById('sort-dir-btn');
+  btn.textContent = sortDir === 'asc' ? '↑' : '↓';
+  btn.classList.toggle('desc', sortDir === 'desc');
+  filterApplications();
+}
+
+/* ── Clear search ── */
+function clearSearch() {
+  const inp = document.getElementById('search-input');
+  inp.value = '';
+  document.getElementById('search-box-wrap').classList.remove('has-value');
+  filterApplications();
+  inp.focus();
+}
+
+/* ── Reset all filters ── */
+function resetAllFilters() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-box-wrap').classList.remove('has-value');
+  ['filter-status','filter-dept','filter-gender','filter-grade','filter-gov','filter-year','sort-field'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['filter-date-from','filter-date-to'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.querySelectorAll('.qf-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.qf-btn[data-status=""]')?.classList.add('active');
+  sortDir = 'desc';
+  const dirBtn = document.getElementById('sort-dir-btn');
+  if (dirBtn) { dirBtn.textContent = '↓'; dirBtn.classList.remove('desc'); }
+  const lbl = document.getElementById('quick-sort-label');
+  if (lbl) lbl.textContent = 'الأحدث أولاً';
+  filterApplications();
+}
+
+/* ── Populate dynamic dropdowns from data ── */
+function populateDynamicFilters() {
+  const govs  = [...new Set(allApps.map(a => a['المحافظة']).filter(Boolean))].sort();
+  const years = [...new Set(allApps.map(a => a['سنة التخرج']).filter(Boolean))].sort((a,b) => b-a);
+
+  const govSel = document.getElementById('filter-gov');
+  if (govSel) govs.forEach(g => {
+    const opt = document.createElement('option'); opt.value = g; opt.textContent = g;
+    govSel.appendChild(opt);
+  });
+
+  const yearSel = document.getElementById('filter-year');
+  if (yearSel) years.forEach(y => {
+    const opt = document.createElement('option'); opt.value = y; opt.textContent = y;
+    yearSel.appendChild(opt);
+  });
+}
+
+/* ── Build active filter chips ── */
+function buildChips(filters) {
+  const row = document.getElementById('chips-row');
+  const labels = {
+    status:   'الحالة',
+    dept:     'القسم',
+    gender:   'النوع',
+    grade:    'التقدير',
+    gov:      'المحافظة',
+    year:     'سنة التخرج',
+    dateFrom: 'من',
+    dateTo:   'إلى',
+    search:   'بحث'
+  };
+
+  const active = Object.entries(filters).filter(([,v]) => v);
+  if (!active.length) { row.style.display = 'none'; return; }
+  row.style.display = 'flex';
+
+  row.innerHTML = active.map(([key, val]) => `
+    <span class="filter-chip">
+      <span style="opacity:.65;font-size:11px;">${labels[key] || key}:</span>
+      <span class="chip-label">${val}</span>
+      <button class="chip-close" onclick="clearChip('${key}')" title="إزالة">✕</button>
+    </span>
+  `).join('') + `
+    <button class="chip-clear-all" onclick="resetAllFilters()">🗑 مسح الكل</button>
+  `;
+
+  // Update advanced count badge
+  const advCount = document.getElementById('adv-count');
+  const advKeys = ['dept','gender','grade','gov','year','dateFrom','dateTo'];
+  const advActive = advKeys.filter(k => filters[k]).length;
+  if (advActive > 0) {
+    advCount.textContent = advActive;
+    advCount.style.display = 'inline-flex';
+  } else {
+    advCount.style.display = 'none';
+  }
+
+  // Highlight active filter selects
+  ['filter-dept','filter-gender','filter-grade','filter-gov','filter-year','filter-date-from','filter-date-to'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active-filter', !!el.value);
+  });
+}
+
+/* ── Clear single chip ── */
+function clearChip(key) {
+  const map = {
+    status:   () => { document.getElementById('filter-status').value = ''; document.querySelectorAll('.qf-btn').forEach(b=>b.classList.remove('active')); document.querySelector('.qf-btn[data-status=""]')?.classList.add('active'); },
+    dept:     () => { document.getElementById('filter-dept').value = ''; },
+    gender:   () => { document.getElementById('filter-gender').value = ''; },
+    grade:    () => { document.getElementById('filter-grade').value = ''; },
+    gov:      () => { document.getElementById('filter-gov').value = ''; },
+    year:     () => { document.getElementById('filter-year').value = ''; },
+    dateFrom: () => { document.getElementById('filter-date-from').value = ''; },
+    dateTo:   () => { document.getElementById('filter-date-to').value = ''; },
+    search:   () => { document.getElementById('search-input').value = ''; document.getElementById('search-box-wrap').classList.remove('has-value'); }
+  };
+  map[key]?.();
+  filterApplications();
+}
+
+/* ── Update results bar ── */
+function updateResultsBar(filtered, total) {
+  document.getElementById('results-count').textContent = `${filtered} طلب`;
+  const pctEl = document.getElementById('results-pct');
+  if (filtered < total) {
+    const pct = total ? Math.round(filtered/total*100) : 0;
+    pctEl.innerHTML = `<span class="pct-pill">${pct}%</span> من ${total} إجمالي`;
+  } else {
+    pctEl.textContent = `إجمالي ${total} طلب`;
+  }
+}
+
+// ============================================================
+// Table
+// ============================================================
+function filterApplications() {
+  const q        = document.getElementById('search-input').value.trim();
+  const qLower   = q.toLowerCase();
+  const status   = document.getElementById('filter-status')?.value   || '';
+  const dept     = document.getElementById('filter-dept')?.value     || '';
+  const gender   = document.getElementById('filter-gender')?.value   || '';
+  const grade    = document.getElementById('filter-grade')?.value    || '';
+  const gov      = document.getElementById('filter-gov')?.value      || '';
+  const year     = document.getElementById('filter-year')?.value     || '';
+  const dateFrom = document.getElementById('filter-date-from')?.value || '';
+  const dateTo   = document.getElementById('filter-date-to')?.value   || '';
+  const sortFld  = document.getElementById('sort-field')?.value      || '';
+
+  // Search box state
+  const searchBox = document.getElementById('search-box-wrap');
+  if (searchBox) searchBox.classList.toggle('has-value', !!q);
+
+  // Build chips
+  buildChips({ search: q, status, dept, gender, grade, gov, year, dateFrom, dateTo });
+
+  filteredApps = allApps.filter(app => {
+    // Search
+    if (qLower && !(
+      String(app['الاسم الرباعي'] || '').toLowerCase().includes(qLower) ||
+      String(app['الرقم القومي'] || '').includes(qLower) ||
+      String(app['ID'] || '').toLowerCase().includes(qLower) ||
+      String(app['رقم التليفون'] || '').includes(qLower)
+    )) return false;
+
+    // Filters
+    if (status   && app['الحالة']       !== status)  return false;
+    if (dept     && app['القسم']         !== dept)    return false;
+    if (gender   && app['النوع']         !== gender)  return false;
+    if (grade    && app['التقدير']       !== grade)   return false;
+    if (gov      && app['المحافظة']      !== gov)     return false;
+    if (year     && String(app['سنة التخرج']) !== year) return false;
+
+    // Date range
+    if (dateFrom || dateTo) {
+      const appDate = app['تاريخ التقديم'] ? new Date(app['تاريخ التقديم']) : null;
+      if (!appDate) return false;
+      if (dateFrom && appDate < new Date(dateFrom)) return false;
+      if (dateTo   && appDate > new Date(dateTo + 'T23:59:59')) return false;
+    }
+
+    return true;
+  });
+
+  // Sort
+  const effectiveSortFld = sortFld || 'تاريخ التقديم';
+  const gradeOrder = { 'امتياز': 5, 'مشرف': 4, 'جيد جداً': 3, 'جيد': 2, 'مقبول': 1 };
+
+  function parseDate(v) {
+    if (!v) return 0;
+    // Remove invisible control/direction characters, then convert Arabic-Indic numerals to Western
+    const cleaned = String(v)
+      .replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '')
+      .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    // Extract dd/mm/yyyy
+    const m1 = cleaned.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (m1) return new Date(parseInt(m1[3]), parseInt(m1[2]) - 1, parseInt(m1[1])).getTime();
+    // Extract yyyy-mm-dd
+    const m2 = cleaned.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+    if (m2) return new Date(parseInt(m2[1]), parseInt(m2[2]) - 1, parseInt(m2[3])).getTime();
+    return 0;
+  }
+
+  filteredApps.sort((a, b) => {
+    let va = a[effectiveSortFld] || '', vb = b[effectiveSortFld] || '';
+    if (effectiveSortFld === 'التقدير') {
+      va = gradeOrder[va] || 0; vb = gradeOrder[vb] || 0;
+      return sortDir === 'asc' ? va - vb : vb - va;
+    }
+    if (effectiveSortFld === 'تاريخ التقديم' || effectiveSortFld === 'سنة التخرج') {
+      const ta = parseDate(va), tb = parseDate(vb);
+      return sortDir === 'asc' ? ta - tb : tb - ta;
+    }
+    return sortDir === 'asc' ? String(va).localeCompare(String(vb), 'ar') : String(vb).localeCompare(String(va), 'ar');
+  });
+
+  // Update date column header arrow
+  updateDateSortHeader();
+
+  updateResultsBar(filteredApps.length, allApps.length);
+  currentPage = 1;
+  renderTable();
+}
+
+function renderTable() {
+  const start = (currentPage - 1) * pageSize;
+  const slice = filteredApps.slice(start, start + pageSize);
+  const tbody = document.getElementById('apps-tbody');
+
+  if (!slice.length) {
+    tbody.innerHTML = `
+      <tr><td colspan="9" style="text-align:center;">
+        <div class="empty-state" style="padding:40px 20px;">
+          <div class="empty-state-icon">🔍</div>
+          <h3>لا توجد طلبات</h3>
+          <p>جرّب تغيير معايير البحث أو التصفية</p>
+        </div>
+      </td></tr>`;
+    renderPagination();
+    return;
+  }
+
+  tbody.innerHTML = slice.map(app => `
+    <tr>
+      <td><code style="font-size:11px; background:var(--surface-2); padding:3px 7px; border-radius:4px;">${app['ID']}</code></td>
+      <td style="font-weight:700;">${app['الاسم الرباعي']}</td>
+      <td style="font-size:12px; color:var(--text-2);">${app['القسم'] || '—'}</td>
+      <td dir="ltr" style="font-size:12px; letter-spacing:1px; color:var(--text-2);">${app['الرقم القومي']}</td>
+      <td dir="ltr" style="font-size:12px;">${app['رقم التليفون'] || '—'}</td>
+      <td><span class="status-badge status-grade">${app['التقدير'] || '—'}</span></td>
+      <td>${statusBadge(app['الحالة'])}</td>
+      <td style="font-size:12px; color:var(--text-3);">${String(app['تاريخ التقديم']).substring(0, 16)}</td>
+      <td>
+        <div style="display:flex; gap:5px;">
+          <button class="btn btn-outline btn-sm" onclick="openDetail('${app['ID']}')">عرض</button>
+          <button class="btn btn-gold btn-sm" onclick="openWhatsApp('${app['ID']}')">💬</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  renderPagination();
+}
+
+function statusBadge(s) {
+  const map = {
+    'قيد المراجعة': 'status-pending',
+    'مقبول': 'status-accepted',
+    'مرفوض': 'status-rejected',
+    'بانتظار المستندات': 'status-waiting'
+  };
+  return `<span class="status-badge ${map[s] || ''}">${s || '—'}</span>`;
+}
+
+function renderPagination() {
+  const total = filteredApps.length;
+  const pages = Math.ceil(total / pageSize);
+  const el = document.getElementById('pagination');
+
+  if (pages <= 1) { el.innerHTML = `<span style="font-size:12px;color:var(--text-3);">${total} طلب</span>`; return; }
+
+  let html = `<span style="font-size:12px;color:var(--text-3);margin-left:8px;">${total} طلب</span>`;
+  for (let i = 1; i <= pages; i++) {
+    html += `<div class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function goPage(n) { currentPage = n; renderTable(); window.scrollTo(0, 200); }
+
+// ============================================================
+// Page navigation
+// ============================================================
+function showPage(name, statusFilter) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${name}`)?.classList.add('active');
+
+  const titles = { dashboard: 'لوحة التحكم', applications: 'جميع الطلبات' };
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+
+  if (name === 'applications') {
+    if (statusFilter) {
+      document.getElementById('filter-status').value = statusFilter;
+      document.getElementById('apps-page-title').textContent = statusFilter;
+    } else {
+      document.getElementById('filter-status').value = '';
+      document.getElementById('apps-page-title').textContent = 'جميع الطلبات';
+    }
+    // Sync quick filter pills
+    document.querySelectorAll('.qf-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.status === (statusFilter || ''));
+    });
+    filterApplications();
+  }
+}
+
+// ============================================================
+// Open Detail Modal
+// ============================================================
+const docLabels = {
+  'شهادة التخرج': 'cert_grad',
+  'بيان درجات السنة الأولى': 'grades_year1',
+  'بيان درجات السنة الثانية': 'grades_year2',
+  'موقف من التجنيد': 'military_doc',
+  'صورة البطاقة الشخصية': 'id_card',
+  'شهادة الميلاد': 'birth_cert',
+  'إفادة جهة العمل': 'work_letter'
+};
+
+function openDetail(id) {
+  currentApp = allApps.find(a => a['ID'] === id);
+  if (!currentApp) return;
+
+  const a = currentApp;
+  document.getElementById('modal-app-id').textContent = `طلب رقم: ${a['ID']}`;
+
+  const docs = [
+    ['شهادة التخرج', a['شهادة التخرج']],
+    ['بيان درجات السنة الأولى', a['بيان درجات السنة الأولى']],
+    ['بيان درجات السنة الثانية', a['بيان درجات السنة الثانية']],
+    ['موقف من التجنيد', a['موقف من التجنيد']],
+    ['صورة البطاقة الشخصية', a['صورة البطاقة الشخصية']],
+    ['شهادة الميلاد', a['شهادة الميلاد']],
+    ['إفادة جهة العمل', a['إفادة جهة العمل']],
+  ].filter(d => d[1]);
+
+  document.getElementById('modal-body').innerHTML = `
+
+    <!-- Personal -->
+    <div class="section-divider">👤 البيانات الشخصية</div>
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-label">الاسم الرباعي</div><div class="detail-value">${a['الاسم الرباعي']}</div></div>
+      <div class="detail-item"><div class="detail-label">الرقم القومي</div><div class="detail-value" dir="ltr" style="letter-spacing:1px;">${a['الرقم القومي']}</div></div>
+      <div class="detail-item"><div class="detail-label">النوع</div><div class="detail-value">${a['النوع']}</div></div>
+      <div class="detail-item"><div class="detail-label">تاريخ الميلاد</div><div class="detail-value">${a['تاريخ الميلاد'] || '—'}</div></div>
+      <div class="detail-item"><div class="detail-label">العمر</div><div class="detail-value">${a['العمر'] || '—'} سنة</div></div>
+      <div class="detail-item"><div class="detail-label">المحافظة</div><div class="detail-value">${a['المحافظة']}</div></div>
+      <div class="detail-item"><div class="detail-label">القسم</div><div class="detail-value">${a['القسم']}</div></div>
+      <div class="detail-item"><div class="detail-label">تاريخ التقديم</div><div class="detail-value" style="font-size:13px;">${a['تاريخ التقديم']}</div></div>
+    </div>
+
+    <!-- Academic -->
+    <div class="section-divider">🎓 البيانات الأكاديمية</div>
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-label">سنة التخرج</div><div class="detail-value">${a['سنة التخرج']}</div></div>
+      <div class="detail-item"><div class="detail-label">سنوات منذ التخرج</div><div class="detail-value">${a['سنوات منذ التخرج'] || '—'}</div></div>
+      <div class="detail-item"><div class="detail-label">التقدير</div><div class="detail-value">${a['التقدير']}</div></div>
+      <div class="detail-item"><div class="detail-label">النسبة المئوية</div><div class="detail-value">${a['النسبة المئوية'] || '—'}</div></div>
+      <div class="detail-item"><div class="detail-label">المجموع</div><div class="detail-value">${a['المجموع'] || '—'}</div></div>
+      <div class="detail-item"><div class="detail-label">الموقف من التجنيد</div><div class="detail-value">${a['الموقف من التجنيد'] || '—'}</div></div>
+    </div>
+
+    <!-- Contact -->
+    <div class="section-divider">📱 بيانات التواصل</div>
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-label">رقم التليفون</div><div class="detail-value" dir="ltr">${a['رقم التليفون']}</div></div>
+      <div class="detail-item"><div class="detail-label">رقم الواتساب</div><div class="detail-value" dir="ltr">${a['رقم الواتساب']}</div></div>
+      <div class="detail-item col-span-2"><div class="detail-label">البريد الإلكتروني</div><div class="detail-value">${a['البريد الإلكتروني']}</div></div>
+    </div>
+
+    <!-- Documents -->
+    <div class="section-divider">📎 المستندات المرفوعة</div>
+    ${docs.length ? `
+    <div class="docs-grid">
+      ${docs.map(([label, url]) => `
+        <div class="doc-card" onclick="openLightbox('${url}','${label}')">
+          <img src="${driveImageUrl(url, 400)}" alt="${label}" onerror="this.parentElement.querySelector('img').src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 80\\'><rect width=\\'100\\' height=\\'80\\' fill=\\'%23f5f8fa\\'/><text y=\\'45\\' x=\\'50\\' text-anchor=\\'middle\\' font-size=\\'28\\'>📄</text></svg>'">
+          <div class="doc-card-label">${label}</div>
+        </div>
+      `).join('')}
+    </div>
+    ` : '<p style="color:var(--text-3);font-size:13px; padding:10px;">لا توجد مستندات مرفوعة</p>'}
+
+    <!-- Status Update -->
+    <div class="status-panel">
+      <h4>🔄 تحديث حالة الطلب</h4>
+      <div class="status-options" id="status-options">
+        ${['مقبول','مرفوض','قيد المراجعة','بانتظار المستندات'].map(s => `
+          <div class="status-opt ${a['الحالة']===s?'selected':''}" data-s="${s}" onclick="selectStatus(this)">${s}</div>
+        `).join('')}
+      </div>
+      <textarea class="notes-box" id="modal-notes" placeholder="ملاحظات الإدارة (اختياري)...">${a['ملاحظات الإدارة'] || ''}</textarea>
+      <textarea class="notes-box" id="modal-rejection" placeholder="سبب الرفض (في حال الرفض)...">${a['سبب الرفض'] || ''}</textarea>
+      <button class="btn btn-primary" onclick="saveStatus()">💾 حفظ الحالة</button>
+    </div>
+
+    <!-- WhatsApp -->
+    <div class="wa-panel">
+      <h4>💬 إرسال رسالة واتساب</h4>
+      <div class="wa-preview" id="wa-preview-text"></div>
+      <button class="btn btn-success" onclick="sendWhatsApp()">📤 فتح واتساب وإرسال</button>
+    </div>
+  `;
+
+  updateWaPreview(a);
+
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function updateWaPreview(a) {
+  const status = document.querySelector('.status-opt.selected')?.dataset?.s || a['الحالة'];
+  const statusMessages = {
+    'مقبول': `✅ *يسعدنا إبلاغك بقبول طلب التحاقك.*\n\nيرجى التواصل مع إدارة الكلية لاستكمال إجراءات القيد.`,
+    'مرفوض': `❌ *نأسف لإبلاغك بعدم القبول في هذه المرحلة.*\n\nيمكن التقدم مرة أخرى في الدورات القادمة.`,
+    'قيد المراجعة': `⏳ *طلبك قيد المراجعة حالياً.*\n\nسيتم التواصل معك قريباً بالنتيجة.`,
+    'بانتظار المستندات': `📎 *يرجى إكمال ملف المستندات المطلوبة.*\n\nتواصل مع إدارة الكلية لمعرفة المستندات الناقصة.`
+  };
+
+  const msg = `*${COLLEGE_NAME}*\n\nالسيد/ة: *${a['الاسم الرباعي']}*\nرقم الطلب: *${a['ID']}*\nالقسم: *${a['القسم']}*\n\n${statusMessages[status] || ''}\n\n_جامعة بني سويف — كلية تكنولوجيا العلوم الصحية التطبيقية_`;
+
+  const el = document.getElementById('wa-preview-text');
+  if (el) el.textContent = msg;
+}
+
+function selectStatus(el) {
+  document.querySelectorAll('.status-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  if (currentApp) updateWaPreview(currentApp);
+}
+
+async function saveStatus() {
+  if (!currentApp) return;
+  const status = document.querySelector('.status-opt.selected')?.dataset?.s;
+  if (!status) { toast('يرجى اختيار الحالة أولاً', 'error'); return; }
+
+  showLoading('جاري الحفظ...');
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'updateStatus',
+        id: currentApp['ID'],
+        status,
+        notes: document.getElementById('modal-notes').value,
+        rejectionReason: document.getElementById('modal-rejection').value
+      })
+    });
+    const json = await res.json();
+    if (json.success) {
+      toast('تم تحديث الحالة بنجاح ✓', 'success');
+      await loadData();
+    } else toast('حدث خطأ: ' + json.message, 'error');
+  } catch (err) {
+    toast('تعذر الاتصال', 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+function openWhatsApp(id) {
+  const app = allApps.find(a => a['ID'] === id);
+  if (!app) return;
+  openDetail(id);
+  setTimeout(() => {
+    document.querySelector('.wa-panel')?.scrollIntoView({ behavior: 'smooth' });
+  }, 300);
+}
+
+function sendWhatsApp() {
+  if (!currentApp) return;
+  try {
+    const msg = document.getElementById('wa-preview-text').textContent;
+    const intlPhone = toIntlPhone(currentApp['رقم الواتساب'] || currentApp['رقم التليفون']);
+    if (!intlPhone) { toast('لا يوجد رقم واتساب مسجل', 'error'); return; }
+
+    const encoded = encodeURIComponent(msg);
+    const url = `https://wa.me/${intlPhone}?text=${encoded}`;
+    const win = window.open(url, '_blank');
+    if (!win) {
+      // popup blocked - fallback: navigate current tab
+      toast('تم حظر النافذة المنبثقة، يتم الفتح في نفس الصفحة...');
+      location.href = url;
+    }
+
+    // Log
+    fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'sendWhatsApp', id: currentApp['ID'], phone: intlPhone, status: currentApp['الحالة'] })
+    }).catch(() => {});
+  } catch (err) {
+    toast('حدث خطأ أثناء فتح واتساب: ' + err.message, 'error');
+  }
+}
+
+/* ── Normalize phone numbers to international (Egypt) format for wa.me ── */
+function toIntlPhone(raw) {
+  let phone = String(raw || '').trim().replace(/[^0-9]/g, '');
+  if (!phone) return '';
+  if (phone.startsWith('20')) return phone;        // already international
+  if (phone.startsWith('0')) phone = phone.slice(1); // drop leading 0
+  return '20' + phone;
+}
+
+// ============================================================
+// Modal
+// ============================================================
+function closeModal(e) {
+  if (e.target === document.getElementById('detail-modal')) closeModalNow();
+}
+
+function closeModalNow() {
+  document.getElementById('detail-modal').classList.remove('open');
+  currentApp = null;
+}
+
+// ============================================================
+// Google Drive link → embeddable image URL
+// ============================================================
+function driveImageUrl(url, size) {
+  if (!url) return '';
+  // يدعم صيغ: /file/d/ID/view , open?id=ID , uc?id=ID , أو ID مجرد
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]{10,})/) || url.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
+  const id = m ? m[1] : null;
+  if (!id) return url; // مش رابط درايف معروف، استخدمه زي ما هو
+  return `https://drive.google.com/thumbnail?id=${id}&sz=w${size || 1000}`;
+}
+
+// ============================================================
+// Lightbox (with zoom & pan)
+// ============================================================
+let lbZoom = 1;
+let lbPanX = 0, lbPanY = 0;
+let lbDragging = false, lbDragStartX = 0, lbDragStartY = 0, lbPanStartX = 0, lbPanStartY = 0;
+const LB_MIN_ZOOM = 1, LB_MAX_ZOOM = 5, LB_ZOOM_STEP = 0.5;
+
+function openLightbox(url, label) {
+  document.getElementById('lightbox-img').src = driveImageUrl(url, 1200);
+  document.getElementById('lightbox-label').textContent = label;
+  document.getElementById('lightbox-original').href = url;
+  document.getElementById('lightbox').classList.add('open');
+  lbResetTransform();
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  lbResetTransform();
+}
+
+function handleLightboxBgClick(e) {
+  // اقفل بس لو الضغطة كانت على الخلفية نفسها مش على الصورة أو أي عنصر تاني جواها
+  if (e.target.id === 'lightbox' || e.target.id === 'lightbox-img-wrap') {
+    closeLightbox();
+  }
+}
+
+function lbApplyTransform() {
+  const img = document.getElementById('lightbox-img');
+  img.style.transform = `translate(${lbPanX}px, ${lbPanY}px) scale(${lbZoom})`;
+  img.classList.toggle('zoomed', lbZoom > 1);
+  document.getElementById('zoom-level').textContent = Math.round(lbZoom * 100) + '%';
+}
+
+function lbResetTransform() {
+  lbZoom = 1; lbPanX = 0; lbPanY = 0;
+  const img = document.getElementById('lightbox-img');
+  if (img) { img.classList.remove('zoomed', 'dragging'); }
+  lbApplyTransform();
+}
+
+function zoomIn() {
+  lbZoom = Math.min(LB_MAX_ZOOM, lbZoom + LB_ZOOM_STEP);
+  if (lbZoom === LB_MIN_ZOOM) { lbPanX = 0; lbPanY = 0; }
+  lbApplyTransform();
+}
+
+function zoomOut() {
+  lbZoom = Math.max(LB_MIN_ZOOM, lbZoom - LB_ZOOM_STEP);
+  if (lbZoom === LB_MIN_ZOOM) { lbPanX = 0; lbPanY = 0; }
+  lbApplyTransform();
+}
+
+function zoomReset() {
+  lbResetTransform();
+}
+
+(function initLightboxInteractions() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const img = document.getElementById('lightbox-img');
+    const wrap = document.getElementById('lightbox-img-wrap');
+    if (!img || !wrap) return;
+
+    // Scroll wheel zoom
+    wrap.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (e.deltaY < 0) { zoomIn(); } else { zoomOut(); }
+    }, { passive: false });
+
+    // Double click to toggle zoom
+    img.addEventListener('dblclick', () => {
+      if (lbZoom > 1) { lbResetTransform(); }
+      else { lbZoom = 2.5; lbApplyTransform(); }
+    });
+
+    // Click once to zoom in (only when not zoomed, to avoid conflicting with drag)
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (lbZoom === 1) { lbZoom = 2; lbApplyTransform(); }
+    });
+
+    // Drag to pan when zoomed (mouse)
+    img.addEventListener('mousedown', (e) => {
+      if (lbZoom <= 1) return;
+      e.preventDefault();
+      lbDragging = true;
+      img.classList.add('dragging');
+      lbDragStartX = e.clientX; lbDragStartY = e.clientY;
+      lbPanStartX = lbPanX; lbPanStartY = lbPanY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!lbDragging) return;
+      lbPanX = lbPanStartX + (e.clientX - lbDragStartX);
+      lbPanY = lbPanStartY + (e.clientY - lbDragStartY);
+      lbApplyTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (lbDragging) { lbDragging = false; img.classList.remove('dragging'); }
+    });
+
+    // Touch support (drag to pan + pinch to zoom)
+    let touchStartDist = 0, touchStartZoom = 1;
+
+    function touchDist(t) {
+      const dx = t[0].clientX - t[1].clientX;
+      const dy = t[0].clientY - t[1].clientY;
+      return Math.hypot(dx, dy);
+    }
+
+    img.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        touchStartDist = touchDist(e.touches);
+        touchStartZoom = lbZoom;
+      } else if (e.touches.length === 1 && lbZoom > 1) {
+        lbDragging = true;
+        lbDragStartX = e.touches[0].clientX; lbDragStartY = e.touches[0].clientY;
+        lbPanStartX = lbPanX; lbPanStartY = lbPanY;
+      }
+    }, { passive: true });
+
+    img.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const dist = touchDist(e.touches);
+        lbZoom = Math.min(LB_MAX_ZOOM, Math.max(LB_MIN_ZOOM, touchStartZoom * (dist / touchStartDist)));
+        lbApplyTransform();
+      } else if (e.touches.length === 1 && lbDragging) {
+        lbPanX = lbPanStartX + (e.touches[0].clientX - lbDragStartX);
+        lbPanY = lbPanStartY + (e.touches[0].clientY - lbDragStartY);
+        lbApplyTransform();
+      }
+    }, { passive: false });
+
+    img.addEventListener('touchend', () => { lbDragging = false; });
+  });
+})();
+
+// ============================================================
+// Export XLSX
+// ============================================================
+function exportData() {
+  const headers = ['ID','تاريخ التقديم','الاسم الرباعي','الرقم القومي','النوع','المحافظة','القسم',
+    'سنة التخرج','التقدير','النسبة المئوية','رقم التليفون','رقم الواتساب','البريد الإلكتروني','الحالة'];
+
+  // Build worksheet data
+  const wsData = [headers, ...filteredApps.map(a => headers.map(h => String(a[h] || '')))];
+
+  // Load SheetJS from CDN then export
+  if (typeof XLSX !== 'undefined') {
+    doXlsxExport(wsData);
+  } else {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    script.onload = () => doXlsxExport(wsData);
+    script.onerror = () => toast('تعذر تحميل مكتبة Excel', 'error');
+    document.head.appendChild(script);
+  }
+}
+
+function doXlsxExport(wsData) {
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:14},{wch:20},{wch:24},{wch:16},{wch:8},{wch:14},{wch:20},
+    {wch:12},{wch:12},{wch:14},{wch:14},{wch:14},{wch:24},{wch:16}
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'الطلبات');
+  XLSX.writeFile(wb, `طلبات_${new Date().toLocaleDateString('ar-EG').replace(/[\/\\:*?"<>|]/g,'-')}.xlsx`);
+  toast('تم تصدير ملف Excel ✓', 'success');
+}
+
+// ============================================================
+// Loading / Toast
+// ============================================================
+function showLoading(text = 'جاري التحميل...') {
+  document.getElementById('loading-text').textContent = text;
+  document.getElementById('loading').style.display = 'flex';
+}
+
+function hideLoading() {
+  document.getElementById('loading').style.display = 'none';
+}
+
+function toast(msg, type = '') {
+  const icons = { success: '✓', error: '✕', '': 'ℹ' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = `${icons[type]} ${msg}`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// ============================================================
+// Keyboard shortcuts
+// ============================================================
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModalNow();
+    closeLightbox();
+  }
+});
+</script>
+</body>
+</html>
