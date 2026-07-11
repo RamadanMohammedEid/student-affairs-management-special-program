@@ -9,7 +9,7 @@
      ⚙️ CONFIG - غيّر هذه القيم
      ======================================================== -->
 <script>
-  const API_URL     = 'https://script.google.com/macros/s/AKfycbwcuQ594NSbsfVAqnK6VVsj_rmq5mGtQfJyRR-BS0N2aIswFOAHq4210UXpU0N0oXL6/exec';
+  const API_URL     = 'https://script.google.com/macros/s/AKfycbzdVBXVfU6XvmjgqUXxYX776ssHHqCpFyyNYanWTkXf2wVkU32vCln71WBNx9pWVb5l/exec';
   const ADMIN_PASS  = 'admin2025';           // كلمة مرور الإدارة
   const COLLEGE_NAME = 'كلية تكنولوجيا العلوم الصحية التطبيقية — جامعة بني سويف';
   // رابط لوجو الكلية (يمكن تغييره)
@@ -1331,6 +1331,54 @@ function startClock() {
 }
 
 // ============================================================
+// Egyptian National ID → Birth date & Age (Egypt timezone)
+// ============================================================
+/**
+ * يرجّع الآن (Date object) بتوقيت مصر (Africa/Cairo) بغض النظر عن توقيت جهاز المستخدم
+ */
+function getEgyptNow() {
+  const cairoStr = new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+  return new Date(cairoStr);
+}
+
+/**
+ * يستخرج تاريخ الميلاد والعمر من الرقم القومي المصري (14 رقم)
+ * البنية: [قرن][سنتين][شهرين][يومين][كود المحافظة 2][تسلسل3][رقم تحقق1]
+ * قرن: 2 => 1900-1999 , 3 => 2000-2099
+ * يرجع null لو الرقم القومي مش صالح (طوله أو تنسيقه غلط)
+ */
+function getBirthInfoFromNationalId(nationalId) {
+  const id = String(nationalId || '').replace(/[^0-9]/g, '');
+  if (id.length !== 14) return null;
+
+  const centuryDigit = id.charAt(0);
+  const centuryMap = { '2': 1900, '3': 2000 };
+  const century = centuryMap[centuryDigit];
+  if (!century) return null;
+
+  const yy = parseInt(id.substring(1, 3), 10);
+  const mm = parseInt(id.substring(3, 5), 10);
+  const dd = parseInt(id.substring(5, 7), 10);
+  if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+
+  const year = century + yy;
+  const birthDate = new Date(year, mm - 1, dd);
+  // تأكد إن التاريخ فعلاً صالح (زي 30 فبراير هيترفض تلقائياً)
+  if (birthDate.getMonth() !== mm - 1 || birthDate.getDate() !== dd) return null;
+
+  const now = getEgyptNow();
+  let age = now.getFullYear() - birthDate.getFullYear();
+  const hadBirthdayThisYear =
+    (now.getMonth() > birthDate.getMonth()) ||
+    (now.getMonth() === birthDate.getMonth() && now.getDate() >= birthDate.getDate());
+  if (!hadBirthdayThisYear) age--;
+
+  const dateStr = `${String(dd).padStart(2, '0')}/${String(mm).padStart(2, '0')}/${year}`;
+
+  return { birthDate, age, dateStr };
+}
+
+// ============================================================
 // Load Data
 // ============================================================
 async function loadData() {
@@ -1828,6 +1876,11 @@ function openDetail(id) {
   const a = currentApp;
   document.getElementById('modal-app-id').textContent = `طلب رقم: ${a['ID']}`;
 
+  // احسب تاريخ الميلاد والعمر من الرقم القومي (بتوقيت مصر)، مع رجوع للبيانات الأصلية لو الرقم غير صالح
+  const birthInfo = getBirthInfoFromNationalId(a['الرقم القومي']);
+  const birthDateDisplay = birthInfo ? birthInfo.dateStr : (a['تاريخ الميلاد'] || '—');
+  const ageDisplay = birthInfo ? birthInfo.age : (a['العمر'] || '—');
+
   const docs = [
     ['شهادة التخرج', a['شهادة التخرج']],
     ['بيان درجات السنة الأولى', a['بيان درجات السنة الأولى']],
@@ -1846,8 +1899,8 @@ function openDetail(id) {
       <div class="detail-item"><div class="detail-label">الاسم الرباعي</div><div class="detail-value">${a['الاسم الرباعي']}</div></div>
       <div class="detail-item"><div class="detail-label">الرقم القومي</div><div class="detail-value" dir="ltr" style="letter-spacing:1px;">${a['الرقم القومي']}</div></div>
       <div class="detail-item"><div class="detail-label">النوع</div><div class="detail-value">${a['النوع']}</div></div>
-      <div class="detail-item"><div class="detail-label">تاريخ الميلاد</div><div class="detail-value">${a['تاريخ الميلاد'] || '—'}</div></div>
-      <div class="detail-item"><div class="detail-label">العمر</div><div class="detail-value">${a['العمر'] || '—'} سنة</div></div>
+      <div class="detail-item"><div class="detail-label">تاريخ الميلاد</div><div class="detail-value">${birthDateDisplay}</div></div>
+      <div class="detail-item"><div class="detail-label">العمر</div><div class="detail-value">${ageDisplay} سنة</div></div>
       <div class="detail-item"><div class="detail-label">المحافظة</div><div class="detail-value">${a['المحافظة']}</div></div>
       <div class="detail-item"><div class="detail-label">القسم</div><div class="detail-value">${a['القسم']}</div></div>
       <div class="detail-item"><div class="detail-label">تاريخ التقديم</div><div class="detail-value" style="font-size:13px;">${a['تاريخ التقديم']}</div></div>
@@ -1894,7 +1947,9 @@ function openDetail(id) {
         `).join('')}
       </div>
       <textarea class="notes-box" id="modal-notes" placeholder="ملاحظات الإدارة (اختياري)...">${a['ملاحظات الإدارة'] || ''}</textarea>
-      <textarea class="notes-box" id="modal-rejection" placeholder="سبب الرفض (في حال الرفض)...">${a['سبب الرفض'] || ''}</textarea>
+      <div id="rejection-wrap" style="display:${a['الحالة']==='مرفوض' ? 'block' : 'none'};">
+        <textarea class="notes-box" id="modal-rejection" placeholder="سبب الرفض (إجباري عند اختيار الرفض)...">${a['سبب الرفض'] || ''}</textarea>
+      </div>
       <button class="btn btn-primary" onclick="saveStatus()">💾 حفظ الحالة</button>
     </div>
 
@@ -1929,6 +1984,13 @@ function updateWaPreview(a) {
 function selectStatus(el) {
   document.querySelectorAll('.status-opt').forEach(e => e.classList.remove('selected'));
   el.classList.add('selected');
+
+  // نظهر خانة "سبب الرفض" بس لما الحالة المختارة تكون "مرفوض"
+  const rejectionWrap = document.getElementById('rejection-wrap');
+  if (rejectionWrap) {
+    rejectionWrap.style.display = (el.dataset.s === 'مرفوض') ? 'block' : 'none';
+  }
+
   if (currentApp) updateWaPreview(currentApp);
 }
 
@@ -1936,6 +1998,16 @@ async function saveStatus() {
   if (!currentApp) return;
   const status = document.querySelector('.status-opt.selected')?.dataset?.s;
   if (!status) { toast('يرجى اختيار الحالة أولاً', 'error'); return; }
+
+  const notes           = document.getElementById('modal-notes').value.trim();
+  const rejectionReason = document.getElementById('modal-rejection').value.trim();
+
+  // ✅ لازم يتكتب سبب الرفض قبل الحفظ لو الحالة "مرفوض"
+  if (status === 'مرفوض' && !rejectionReason) {
+    toast('من فضلك اكتب سبب الرفض قبل الحفظ', 'error');
+    document.getElementById('modal-rejection').focus();
+    return;
+  }
 
   showLoading('جاري الحفظ...');
   try {
@@ -1945,8 +2017,9 @@ async function saveStatus() {
         action: 'updateStatus',
         id: currentApp['ID'],
         status,
-        notes: document.getElementById('modal-notes').value,
-        rejectionReason: document.getElementById('modal-rejection').value
+        notes,
+        // سبب الرفض بيتبعت فاضي في أي حالة غير "مرفوض" عشان يتمسح تلقائياً من الشيت
+        rejectionReason: status === 'مرفوض' ? rejectionReason : ''
       })
     });
     const json = await res.json();
