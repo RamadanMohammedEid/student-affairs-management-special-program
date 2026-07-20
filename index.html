@@ -1148,11 +1148,6 @@ textarea.notes-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px r
                 <label>التقدير</label>
                 <select id="filter-grade" onchange="filterApplications()">
                   <option value="">— الكل —</option>
-                  <option>امتياز</option>
-                  <option>مشرف</option>
-                  <option>جيد جداً</option>
-                  <option>جيد</option>
-                  <option>مقبول</option>
                 </select>
               </div>
               <div class="adv-field">
@@ -1184,6 +1179,7 @@ textarea.notes-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px r
                     <option value="الاسم الرباعي">الاسم</option>
                     <option value="القسم">القسم</option>
                     <option value="التقدير">التقدير</option>
+                    <option value="النسبة المئوية">النسبة المئوية</option>
                     <option value="سنة التخرج">سنة التخرج</option>
                   </select>
                   <button class="sort-dir-btn" id="sort-dir-btn" onclick="toggleSortDir()" title="تغيير الاتجاه">↓</button>
@@ -1225,6 +1221,7 @@ textarea.notes-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px r
                 <th>الرقم القومي</th>
                 <th>الهاتف</th>
                 <th>التقدير</th>
+                <th>النسبة المئوية</th>
                 <th>الحالة</th>
                 <th id="th-date" onclick="toggleDateSort()" style="cursor:pointer; user-select:none;" title="ترتيب حسب التاريخ">تاريخ التقديم ↓</th>
                 <th>إجراءات</th>
@@ -1454,17 +1451,16 @@ function renderDeptChart(byDept) {
 function computeByGrade(apps) {
   const byGrade = {};
   apps.forEach(a => {
-    const g = a['التقدير'] || 'غير محدد';
+    const g = normText(a['التقدير']) || 'غير محدد';
     byGrade[g] = (byGrade[g] || 0) + 1;
   });
   return byGrade;
 }
 
 function renderGradeChart(byGrade) {
-  const gradeOrder = ['امتياز', 'مشرف', 'جيد جداً', 'جيد', 'مقبول'];
   const entries = Object.entries(byGrade).sort((a, b) => {
-    const ai = gradeOrder.indexOf(a[0]);
-    const bi = gradeOrder.indexOf(b[0]);
+    const ai = GRADE_ORDER.indexOf(a[0]);
+    const bi = GRADE_ORDER.indexOf(b[0]);
     if (ai === -1 && bi === -1) return b[1] - a[1];
     if (ai === -1) return 1;
     if (bi === -1) return -1;
@@ -1578,10 +1574,28 @@ function resetAllFilters() {
   filterApplications();
 }
 
+/* ── Normalize text values so stray spaces/invisible chars never break exact-match filters ── */
+function normText(v) {
+  return String(v == null ? '' : v)
+    .replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069\u200b\u00a0]/g, '') // invisible/direction chars, nbsp
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+const GRADE_ORDER = ['امتياز', 'ممتاز', 'مشرف', 'جيد جداً', 'جيد جدا', 'جيد', 'مقبول', 'ضعيف'];
+
 /* ── Populate dynamic dropdowns from data ── */
 function populateDynamicFilters() {
-  const govs  = [...new Set(allApps.map(a => a['المحافظة']).filter(Boolean))].sort();
-  const years = [...new Set(allApps.map(a => a['سنة التخرج']).filter(Boolean))].sort((a,b) => b-a);
+  const govs  = [...new Set(allApps.map(a => normText(a['المحافظة'])).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'ar'));
+  const years = [...new Set(allApps.map(a => normText(a['سنة التخرج'])).filter(Boolean))].sort((a,b) => b-a);
+  const grades = [...new Set(allApps.map(a => normText(a['التقدير'])).filter(Boolean))]
+    .sort((a, b) => {
+      const ai = GRADE_ORDER.indexOf(a), bi = GRADE_ORDER.indexOf(b);
+      if (ai === -1 && bi === -1) return a.localeCompare(b, 'ar');
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
 
   const govSel = document.getElementById('filter-gov');
   if (govSel) govs.forEach(g => {
@@ -1594,6 +1608,15 @@ function populateDynamicFilters() {
     const opt = document.createElement('option'); opt.value = y; opt.textContent = y;
     yearSel.appendChild(opt);
   });
+
+  const gradeSel = document.getElementById('filter-grade');
+  if (gradeSel) {
+    gradeSel.innerHTML = '<option value="">— الكل —</option>';
+    grades.forEach(g => {
+      const opt = document.createElement('option'); opt.value = g; opt.textContent = g;
+      gradeSel.appendChild(opt);
+    });
+  }
 }
 
 /* ── Build active filter chips ── */
@@ -1704,13 +1727,13 @@ function filterApplications() {
       String(app['رقم التليفون'] || '').includes(qLower)
     )) return false;
 
-    // Filters
-    if (status   && app['الحالة']       !== status)  return false;
-    if (dept     && app['القسم']         !== dept)    return false;
-    if (gender   && app['النوع']         !== gender)  return false;
-    if (grade    && app['التقدير']       !== grade)   return false;
-    if (gov      && app['المحافظة']      !== gov)     return false;
-    if (year     && String(app['سنة التخرج']) !== year) return false;
+    // Filters (normalized so hidden whitespace/formatting differences from the sheet don't break matching)
+    if (status   && normText(app['الحالة'])          !== normText(status))  return false;
+    if (dept     && normText(app['القسم'])           !== normText(dept))    return false;
+    if (gender   && normText(app['النوع'])           !== normText(gender))  return false;
+    if (grade    && normText(app['التقدير'])         !== normText(grade))   return false;
+    if (gov      && normText(app['المحافظة'])        !== normText(gov))     return false;
+    if (year     && normText(app['سنة التخرج'])      !== normText(year))    return false;
 
     // Date range
     if (dateFrom || dateTo) {
@@ -1725,7 +1748,6 @@ function filterApplications() {
 
   // Sort
   const effectiveSortFld = sortFld || 'تاريخ التقديم';
-  const gradeOrder = { 'امتياز': 5, 'مشرف': 4, 'جيد جداً': 3, 'جيد': 2, 'مقبول': 1 };
 
   function parseDate(v) {
     if (!v) return 0;
@@ -1742,11 +1764,27 @@ function filterApplications() {
     return 0;
   }
 
+  function parsePct(v) {
+    const s = normText(v);
+    const hasSign = /%|٪/.test(s);
+    const n = parseFloat(s.replace(/[%٪]/g, '').replace(',', '.'));
+    if (isNaN(n)) return -1;
+    return (!hasSign && Math.abs(n) <= 1) ? n * 100 : n;
+  }
+
   filteredApps.sort((a, b) => {
     let va = a[effectiveSortFld] || '', vb = b[effectiveSortFld] || '';
     if (effectiveSortFld === 'التقدير') {
-      va = gradeOrder[va] || 0; vb = gradeOrder[vb] || 0;
+      const ia = GRADE_ORDER.indexOf(normText(va));
+      const ib = GRADE_ORDER.indexOf(normText(vb));
+      // lower index = higher grade, so invert into a descending-friendly score
+      va = ia === -1 ? -1 : (GRADE_ORDER.length - ia);
+      vb = ib === -1 ? -1 : (GRADE_ORDER.length - ib);
       return sortDir === 'asc' ? va - vb : vb - va;
+    }
+    if (effectiveSortFld === 'النسبة المئوية') {
+      const pa = parsePct(va), pb = parsePct(vb);
+      return sortDir === 'asc' ? pa - pb : pb - pa;
     }
     if (effectiveSortFld === 'تاريخ التقديم' || effectiveSortFld === 'سنة التخرج') {
       const ta = parseDate(va), tb = parseDate(vb);
@@ -1763,6 +1801,17 @@ function filterApplications() {
   renderTable();
 }
 
+/* ── Format a percentage value; sheet often stores it as a fraction of 1 (e.g. 0.9315 = 93.15%) ── */
+function formatPct(v) {
+  const s = normText(v);
+  if (!s) return '—';
+  const hasSign = /%|٪/.test(s);
+  const num = parseFloat(s.replace(/[%٪]/g, '').replace(',', '.'));
+  if (isNaN(num)) return s;
+  const pct = (!hasSign && Math.abs(num) <= 1) ? num * 100 : num;
+  return (Math.round(pct * 100) / 100) + '%';
+}
+
 function renderTable() {
   const start = (currentPage - 1) * pageSize;
   const slice = filteredApps.slice(start, start + pageSize);
@@ -1770,7 +1819,7 @@ function renderTable() {
 
   if (!slice.length) {
     tbody.innerHTML = `
-      <tr><td colspan="9" style="text-align:center;">
+      <tr><td colspan="10" style="text-align:center;">
         <div class="empty-state" style="padding:40px 20px;">
           <div class="empty-state-icon">🔍</div>
           <h3>لا توجد طلبات</h3>
@@ -1789,6 +1838,7 @@ function renderTable() {
       <td dir="ltr" style="font-size:12px; letter-spacing:1px; color:var(--text-2);">${app['الرقم القومي']}</td>
       <td dir="ltr" style="font-size:12px;">${app['رقم التليفون'] || '—'}</td>
       <td><span class="status-badge status-grade">${app['التقدير'] || '—'}</span></td>
+      <td dir="ltr" style="font-size:12px; color:var(--text-2);">${formatPct(app['النسبة المئوية'])}</td>
       <td>${statusBadge(app['الحالة'])}</td>
       <td style="font-size:12px; color:var(--text-3);">${String(app['تاريخ التقديم']).substring(0, 16)}</td>
       <td>
@@ -1912,7 +1962,7 @@ function openDetail(id) {
       <div class="detail-item"><div class="detail-label">سنة التخرج</div><div class="detail-value">${a['سنة التخرج']}</div></div>
       <div class="detail-item"><div class="detail-label">سنوات منذ التخرج</div><div class="detail-value">${a['سنوات منذ التخرج'] || '—'}</div></div>
       <div class="detail-item"><div class="detail-label">التقدير</div><div class="detail-value">${a['التقدير']}</div></div>
-      <div class="detail-item"><div class="detail-label">النسبة المئوية</div><div class="detail-value">${a['النسبة المئوية'] || '—'}</div></div>
+      <div class="detail-item"><div class="detail-label">النسبة المئوية</div><div class="detail-value">${formatPct(a['النسبة المئوية'])}</div></div>
       <div class="detail-item"><div class="detail-label">المجموع</div><div class="detail-value">${a['المجموع'] || '—'}</div></div>
       <div class="detail-item"><div class="detail-label">الموقف من التجنيد</div><div class="detail-value">${a['الموقف من التجنيد'] || '—'}</div></div>
     </div>
